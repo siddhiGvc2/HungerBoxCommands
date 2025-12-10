@@ -2,12 +2,22 @@ import { useState, useEffect, useRef } from "react";
 
 export default function PaymentUI() {
   const [amount, setAmount] = useState("");
+  const [machineNumber, setMachineNumber] = useState("");
   const [log, setLog] = useState([]);
+  
+
+  const tidRef = useRef("");
+
   const wsRef = useRef(null);
   const intervalRef = useRef(null);
 
   const addLog = (msg) =>
     setLog((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+
+  const generateTID = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit random
+};
+
 
   // ----------------------------- WebSocket Connect ------------------------------
   const connectWebSocket = () => {
@@ -19,7 +29,42 @@ export default function PaymentUI() {
     };
 
     ws.onmessage = (evt) => {
-      addLog("RECV ← " + evt.data);
+    const msg = evt.data.trim();
+    addLog("RECV ← " + msg);
+        // --- AUTO RULE 1: When AmountReceived comes, send SUCCESS ---
+
+        if (msg.startsWith("*") && msg.endsWith("#")) {
+
+    const pure = msg.replace("*", "").replace("#", "");
+    const parts = pure.split(",");
+    
+
+    if (parts.length === 3) {
+      const recvMachine = parts[0];
+      const recvTid = parts[1];
+      const status = parts[2];
+
+
+
+      // CHECK if matches our machine number + TID + AmountReceived
+      if (
+        recvMachine == machineNumber &&
+        recvTid == tidRef.current && // OR recvTid === tid if you use a separate TID
+        status == "AmountReceived"
+      ) {
+        console.log(parts);
+        sendCommand("*SUCCESS#");
+        setTimeout(()=>{
+          sendCommand(`*KBDK${tidRef.current},10,11,20,21#`);
+        },1000)
+      setTimeout(()=>{
+        startStatusPolling();
+      },1000)
+        return;
+      }
+    }
+  }
+  
     };
 
     ws.onerror = (err) => {
@@ -42,15 +87,19 @@ export default function PaymentUI() {
 
   // ----------------------------- Send Command via WebSocket ---------------------
   const sendCommand = async (cmd) => {
-    addLog("SEND → " + cmd);
-    wsRef.current?.send(cmd);
+    console.log(`HB/${machineNumber}`, cmd);
+    addLog("SEND → " + cmd,);
+    wsRef.current?.send(`HB/${machineNumber}`,cmd);
   };
 
   // ----------------------------- Handle SEND Button -----------------------------
   const handleSend = async () => {
     if (!amount) return alert("Enter Amount");
+    const newTid = generateTID();
+    tidRef.current = newTid;
 
-    const vendCommand = `*VEND,TID,PAYTM,${amount}00,TID#`;
+    const vendCommand = `*VEND,${newTid},PAYTM,${amount}00,${newTid}#`;
+   
     await sendCommand(vendCommand);
   };
 
@@ -71,6 +120,19 @@ export default function PaymentUI() {
     <div style={{width:'100%',display:'flex',justifyContent:'center'}}>
       <div style={{ padding: 20, fontFamily: "Arial", maxWidth: 500,minWidth:400 }}>
         <h2>Payment Command UI</h2>
+        <input
+        type="text"
+        placeholder="Enter Machine Number"
+        value={machineNumber}
+        onChange={(e) => setMachineNumber(e.target.value)}
+        style={{
+          padding: 8,
+          width: "100%",
+          marginBottom: 10,
+          fontSize: 16,
+        }}
+      />
+
 
         <input
           type="number"
