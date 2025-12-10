@@ -89,7 +89,8 @@ export default function PaymentUI() {
   const sendCommand = async (cmd) => {
     console.log(`HB/${machineNumber}`, cmd);
     addLog("SEND → " + cmd,);
-    wsRef.current?.send(`HB/${machineNumber}`,cmd);
+     const message = JSON.stringify({ topic: `HB/${machineNumber}`, payload:cmd });
+    wsRef.current?.send(message);
   };
 
   // ----------------------------- Handle SEND Button -----------------------------
