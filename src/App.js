@@ -182,6 +182,7 @@ export default function PaymentUI() {
         </button>
 
         <h3 style={{ marginTop: 20 }}>Logs</h3>
+        <button onClick={()=>setLog([])}>Clear Log</button>
         <div
           style={{
             background: "#eee",
