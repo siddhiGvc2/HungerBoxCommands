@@ -4,7 +4,7 @@ export default function PaymentUI() {
   const [amount, setAmount] = useState("");
   const [machineNumber, setMachineNumber] = useState("");
   const [log, setLog] = useState([]);
-  const [KBDKvalues,setKBDKvalues]=useState({kbd1:10,kbd2:11,kbd3:20,kbd4:21,kbd5:28});
+  const [KBDKvalues,setKBDKvalues]=useState({kbd1:10,kbd2:23,kbd3:45,kbd4:67,kbd5:18,kbd6:19});
   const KBDKvaluesRef = useRef(KBDKvalues);
 
   const tidRef = useRef("");
@@ -59,9 +59,29 @@ export default function PaymentUI() {
         console.log(parts);
         sendCommand("*SUCCESS#");
         setTimeout(()=>{
-          sendCommand(`*KBDK${tidRef.current},${KBDKvaluesRef.current.kbd1},${KBDKvaluesRef.current.kbd2},${KBDKvaluesRef.current.kbd3},${KBDKvaluesRef.current.kbd4},${KBDKvaluesRef.current.kbd5}#`);
+          const kbdValues = [
+  KBDKvaluesRef.current.kbd1,
+  KBDKvaluesRef.current.kbd2,
+  KBDKvaluesRef.current.kbd3,
+  KBDKvaluesRef.current.kbd4,
+  KBDKvaluesRef.current.kbd5,
+  KBDKvaluesRef.current.kbd6,
+];
+
+// remove 0 or "00"
+const filteredValues = kbdValues.filter(
+  (v) => Number(v) !== 0
+);
+
+if (filteredValues.length > 0) {
+  sendCommand(
+    `*KBDK${tidRef.current},${filteredValues.join(",")}#`
+  );
+}
+
+           tidRef.current = "";
         },1000)
-        tidRef.current = ""; // reset TID after use
+        // reset TID after use
         // setTimeout(()=>{
         //   startStatusPolling();
         // },1000)
@@ -92,7 +112,7 @@ export default function PaymentUI() {
 
   // ----------------------------- Send Command via WebSocket ---------------------
   const sendCommand = async (cmd) => {
-    console.log(`HB/${machineNumber.current}`, cmd);
+    console.log(`HB/${machineNumberRef.current}`, cmd);
     addLog("SEND → " + cmd,);
      const message = JSON.stringify({ topic: `HB/${machineNumberRef.current}`, payload:cmd });
     wsRef.current?.send(message);
@@ -164,6 +184,8 @@ export default function PaymentUI() {
             <div>KBD3: <input type="number" value={KBDKvalues.kbd3} onChange={(e)=>setKBDKvalues(prev=>({...prev,kbd3:Number(e.target.value)}))} style={{width:60}}/></div>
             <div>KBD4: <input type="number" value={KBDKvalues.kbd4} onChange={(e)=>setKBDKvalues(prev=>({...prev,kbd4:Number(e.target.value)}))} style={{width:60}}/></div>
             <div>KBD5: <input type="number" value={KBDKvalues.kbd5} onChange={(e)=>setKBDKvalues(prev=>({...prev,kbd5:Number(e.target.value)}))} style={{width:60}}/></div>
+            <div>KBD6: <input type="number" value={KBDKvalues.kbd6} onChange={(e)=>setKBDKvalues(prev=>({...prev,kbd6:Number(e.target.value)}))} style={{width:60}}/></div>
+            
           </div>
         </div>
 
