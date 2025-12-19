@@ -3,12 +3,15 @@ import { useState, useEffect, useRef } from "react";
 export default function PaymentUI() {
   const [amount, setAmount] = useState("");
   const [machineNumber, setMachineNumber] = useState("");
+  const [waitingForAmountReceived, setWaitingForAmountReceived] = useState(false);
+
   const [log, setLog] = useState([]);
   const [KBDKvalues,setKBDKvalues]=useState({kbd1:10,kbd2:23,kbd3:45,kbd4:67,kbd5:18,kbd6:19});
   const KBDKvaluesRef = useRef(KBDKvalues);
 
   const tidRef = useRef("");
   const machineNumberRef = useRef(machineNumber);
+  const waitingForAmountReceivedRef = useRef(waitingForAmountReceived);
 
   const wsRef = useRef(null);
   const intervalRef = useRef(null);
@@ -51,33 +54,37 @@ export default function PaymentUI() {
       console.log("Comparing:", recvMachine == machineNumberRef.current, recvTid == tidRef.current, status == "AmountReceived");
 
       // CHECK if matches our machine number + TID + AmountReceived
+      console.log("Waiting for AmountReceived:", waitingForAmountReceivedRef.current);
       if (
         recvMachine == machineNumberRef.current &&
         recvTid == tidRef.current && // OR recvTid === tid if you use a separate TID
-        status == "AmountReceived"
+        status == "AmountReceived" &&
+        waitingForAmountReceivedRef.current===true
+
       ) {
         console.log(parts);
-        sendCommand("*SUCCESS#");
+        waitingForAmountReceivedRef.current = false;
+        // sendCommand("*SUCCESS#");
         setTimeout(()=>{
           const kbdValues = [
-  KBDKvaluesRef.current.kbd1,
-  KBDKvaluesRef.current.kbd2,
-  KBDKvaluesRef.current.kbd3,
-  KBDKvaluesRef.current.kbd4,
-  KBDKvaluesRef.current.kbd5,
-  KBDKvaluesRef.current.kbd6,
-];
+          KBDKvaluesRef.current.kbd1,
+          KBDKvaluesRef.current.kbd2,
+          KBDKvaluesRef.current.kbd3,
+          KBDKvaluesRef.current.kbd4,
+          KBDKvaluesRef.current.kbd5,
+          KBDKvaluesRef.current.kbd6,
+        ];
 
-// remove 0 or "00"
-const filteredValues = kbdValues.filter(
-  (v) => Number(v) !== 0
-);
+            // remove 0 or "00"
+            const filteredValues = kbdValues.filter(
+              (v) => Number(v) !== 0
+            );
 
-if (filteredValues.length > 0) {
-  sendCommand(
-    `*KBDK${tidRef.current},${filteredValues.join(",")}#`
-  );
-}
+            if (filteredValues.length > 0) {
+              sendCommand(
+                `*KBDK${tidRef.current},${filteredValues.join(",")}#`
+              );
+            }
 
            tidRef.current = "";
         },1000)
@@ -125,6 +132,8 @@ if (filteredValues.length > 0) {
     tidRef.current = newTid;
 
     const vendCommand = `*VEND,${newTid},PAYTM,${amount}00,${newTid}#`;
+    setWaitingForAmountReceived(true);
+    waitingForAmountReceivedRef.current = true;
    
     await sendCommand(vendCommand);
   };
@@ -141,6 +150,10 @@ if (filteredValues.length > 0) {
   useEffect(()=>{
     KBDKvaluesRef.current=KBDKvalues;
   },[KBDKvalues])
+
+  useEffect(()=>{
+    waitingForAmountReceivedRef.current=waitingForAmountReceived;
+  },[waitingForAmountReceived])
 
   useEffect(() => {
     return () => clearInterval(intervalRef.current);
