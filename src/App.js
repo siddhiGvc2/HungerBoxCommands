@@ -6,7 +6,7 @@ export default function PaymentUI() {
   const [waitingForAmountReceived, setWaitingForAmountReceived] = useState(false);
 
   const [log, setLog] = useState([]);
-  const [KBDKvalues,setKBDKvalues]=useState({kbd1:10,kbd2:23,kbd3:45,kbd4:67,kbd5:18,kbd6:19});
+  const [KBDKvalues,setKBDKvalues]=useState({kbd1:10,kbd2:23,kbd3:45,kbd4:67,kbd5:18});
   const KBDKvaluesRef = useRef(KBDKvalues);
 
   const tidRef = useRef("");
@@ -26,7 +26,7 @@ export default function PaymentUI() {
 
   // ----------------------------- WebSocket Connect ------------------------------
   const connectWebSocket = () => {
-    const ws = new WebSocket("ws://snackboss-iot.in:3030"); // <-- your WS URL here
+    const ws = new WebSocket("ws://gvcsystems.com:3030"); // <-- your WS URL here
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -72,7 +72,7 @@ export default function PaymentUI() {
           KBDKvaluesRef.current.kbd3,
           KBDKvaluesRef.current.kbd4,
           KBDKvaluesRef.current.kbd5,
-          KBDKvaluesRef.current.kbd6,
+         
         ];
 
             // remove 0 or "00"
@@ -197,7 +197,7 @@ export default function PaymentUI() {
             <div>KBD3: <input type="number" value={KBDKvalues.kbd3} onChange={(e)=>setKBDKvalues(prev=>({...prev,kbd3:Number(e.target.value)}))} style={{width:60}}/></div>
             <div>KBD4: <input type="number" value={KBDKvalues.kbd4} onChange={(e)=>setKBDKvalues(prev=>({...prev,kbd4:Number(e.target.value)}))} style={{width:60}}/></div>
             <div>KBD5: <input type="number" value={KBDKvalues.kbd5} onChange={(e)=>setKBDKvalues(prev=>({...prev,kbd5:Number(e.target.value)}))} style={{width:60}}/></div>
-            <div>KBD6: <input type="number" value={KBDKvalues.kbd6} onChange={(e)=>setKBDKvalues(prev=>({...prev,kbd6:Number(e.target.value)}))} style={{width:60}}/></div>
+           
             
           </div>
         </div>
