@@ -31,7 +31,7 @@ export default function PaymentUI() {
     wsRef.current = ws;
 
     ws.onopen = () => {
-      addLog("✅ WebSocket Connected");
+      addLog(`✅ WebSocket Connected ws://${wsUrl}`);
     };
 
     ws.onmessage = (evt) => {
