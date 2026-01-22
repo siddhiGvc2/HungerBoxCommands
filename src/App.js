@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 export default function PaymentUI() {
   const [amount, setAmount] = useState("");
   const [machineNumber, setMachineNumber] = useState("");
-  const [wsUrl,setWsUrl]=useState("gvcsystems.com");
+  const [wsUrl,setWsUrl]=useState("gvcsystems.com:3030");
   const [waitingForAmountReceived, setWaitingForAmountReceived] = useState(false);
 
   const [log, setLog] = useState([]);
@@ -27,7 +27,7 @@ export default function PaymentUI() {
 
   // ----------------------------- WebSocket Connect ------------------------------
   const connectWebSocket = () => {
-    const ws = new WebSocket(`ws://${wsUrl}:3030`); // <-- your WS URL here
+    const ws = new WebSocket(`ws://${wsUrl}`); // <-- your WS URL here
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -166,9 +166,9 @@ export default function PaymentUI() {
         <h2>Payment Command UI</h2>
          <h3>Choose Mqtt Websocket</h3>
         <select value={wsUrl} onChange={(e)=>setWsUrl(e.target.value)}>
-            <option value={"gvcsystems.com"}>GVC SYSTEMS</option>
-            <option value={"snackboss-iot.in"}>SNACKBOSS</option>
-            <option value={"provend.in"}>PROVEND</option>
+            <option value={"gvcsystems.com:3030"}>GVC SYSTEMS</option>
+            <option value={"snackboss-iot.in:3030"}>SNACKBOSS</option>
+            <option value={"gvcsystems.com:4040"}>PROVEND</option>
         </select>
         <input
         type="text"
