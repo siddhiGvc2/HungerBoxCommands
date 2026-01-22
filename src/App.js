@@ -24,14 +24,18 @@ export default function PaymentUI() {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit random
 };
 
+ 
 
   // ----------------------------- WebSocket Connect ------------------------------
   const connectWebSocket = () => {
+    var timeOut;
+    console.log(wsUrl);
     const ws = new WebSocket(`ws://${wsUrl}`); // <-- your WS URL here
     wsRef.current = ws;
 
     ws.onopen = () => {
       addLog(`✅ WebSocket Connected ws://${wsUrl}`);
+      clearTimeout(timeOut);
     };
 
     ws.onmessage = (evt) => {
@@ -105,8 +109,8 @@ export default function PaymentUI() {
     };
 
     ws.onclose = () => {
-      addLog("🔌 WebSocket Disconnected — retrying in 3 sec...");
-      setTimeout(connectWebSocket, 3000);
+      // addLog("🔌 WebSocket Disconnected — retrying in 3 sec...");
+      // timeOut=setTimeout(connectWebSocket, 3000);
     };
   };
 
